@@ -10,7 +10,7 @@ namespace CreateProjectOlive.Services
 {
     public class ProjectService : Service<Project>, IProjectService
     {
-        public ProjectService(IOptions<ProjectDataBaseConfig> options) : base(options)
+        public ProjectService(IOptions<DataBaseConfig> options) : base(options)
         {
         }
     }

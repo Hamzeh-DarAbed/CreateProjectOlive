@@ -12,7 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
 builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
 
-builder.Services.Configure<ProjectDataBaseConfig>(builder.Configuration.GetSection("MongoDb"));
+builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("MongoDb"));
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
