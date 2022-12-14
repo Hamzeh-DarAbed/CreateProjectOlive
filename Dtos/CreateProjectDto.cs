@@ -8,15 +8,15 @@ namespace CreateProjectOlive.Dtos
 {
     public class CreateProjectDto
     {
-        [Required]
+        [Required(ErrorMessage = "Project Name is required")]
         public string ProjectName { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Project Description is required")]
         public string ProjectDescription { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Business Type is required")]
         public string BusinessType { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Created By is required")]
         public string CreatedBy { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Domain is required")]
         public string Domain { get; set; }
         
         
