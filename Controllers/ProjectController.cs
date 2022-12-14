@@ -26,6 +26,7 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
+                System.Console.WriteLine(await _unitOfWork.ProjectService.GetAll());
                 return Ok(await _unitOfWork.ProjectService.GetAll());
             }
             catch (Exception e)
@@ -68,7 +69,7 @@ namespace CreateProjectOlive.Controllers
                     BusinessType = projectDto.BusinessType,
                     CreatedBy = projectDto.CreatedBy,
                     Domain = projectDto.Domain,
-                    
+
                 };
 
                 await _unitOfWork.ProjectService.Create(project);
