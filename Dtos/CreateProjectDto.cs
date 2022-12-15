@@ -18,7 +18,7 @@ namespace CreateProjectOlive.Dtos
         public string CreatedBy { get; set; }
         [Required]
         public string Domain { get; set; }
-        
-        
+
+
     }
 }

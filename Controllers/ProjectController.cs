@@ -7,6 +7,9 @@ using CreateProjectOlive.Models;
 using CreateProjectOlive.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.Authorization;
+
+
 namespace CreateProjectOlive.Controllers
 {
     [ApiController]
@@ -22,6 +25,7 @@ namespace CreateProjectOlive.Controllers
 
         [HttpGet]
         [Route("~/GetProjects")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetProjects()
         {
             try

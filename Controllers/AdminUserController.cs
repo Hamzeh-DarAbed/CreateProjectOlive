@@ -1,11 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CreateProjectOlive.Models;
-using CreateProjectOlive.Dtos;
-using Microsoft.AspNetCore.Identity;
+using System.Text;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+
+using CreateProjectOlive.Dtos;
+using CreateProjectOlive.Models;
 
 namespace CreateProjectOlive.Controllers
 {
@@ -15,12 +16,14 @@ namespace CreateProjectOlive.Controllers
         private UserManager<ApplicationUser> _userManager;
         private SignInManager<ApplicationUser> _signInManager;
         private RoleManager<ApplicationRole> _roleManager;
+        private IConfiguration _configuration;
 
-        public AdminUserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
+        public AdminUserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, IConfiguration config)
         {
             this._userManager = userManager;
             this._signInManager = signInManager;
             this._roleManager = roleManager;
+            this._configuration = config;
         }
 
         [HttpPost]
@@ -78,7 +81,8 @@ namespace CreateProjectOlive.Controllers
                     Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, LoginData.Password, false, false);
                     if (result.Succeeded)
                     {
-                        return Ok("you are in");
+                        var token = GenerateToken();
+                        return Ok(token);
                     }
                     else
                     {
@@ -94,7 +98,25 @@ namespace CreateProjectOlive.Controllers
             return BadRequest();
         }
 
+        private string GenerateToken()
+        {
 
+            var claims = new[] {
+                        new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                    };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddHours(24),
+                signingCredentials: signIn);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
 
 
     }

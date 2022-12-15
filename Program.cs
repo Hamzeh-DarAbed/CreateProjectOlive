@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 using CreateProjectOlive.Models;
 using CreateProjectOlive.Services;
 using CreateProjectOlive.UnitOfWork;
@@ -15,8 +19,6 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
             mongoDbSettings.ConnectionString, mongoDbSettings.Database
         );
 
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication("Bearer").AddJwtBearer();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -25,6 +27,22 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("MongoDb"));
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+
+    };
+});
+
 
 var app = builder.Build();
 
@@ -37,7 +55,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 
