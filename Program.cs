@@ -15,6 +15,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
             mongoDbSettings.ConnectionString, mongoDbSettings.Database
         );
 
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
