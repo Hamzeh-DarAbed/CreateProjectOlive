@@ -6,6 +6,7 @@ using System.Text;
 using CreateProjectOlive.Models;
 using CreateProjectOlive.Services;
 using CreateProjectOlive.UnitOfWork;
+using CreateProjectOlive.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,7 +73,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// CreateProjectOlive.Helper.SeedToDBHelper.SeedToDataToDb();
 
+app.UseCustomMiddleware();
 
 app.Run();
 
