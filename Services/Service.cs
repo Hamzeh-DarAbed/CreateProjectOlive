@@ -5,11 +5,18 @@ using System.Threading.Tasks;
 using CreateProjectOlive.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using CreateProjectOlive.Helper;
+using Microsoft.Extensions.Configuration;
+
+
 
 namespace CreateProjectOlive.Services
 {
     public class Service<TDocument> : IService<TDocument> where TDocument : class
     {
+        SeedAdminConfig adminData = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetSection("Admin").Get<SeedAdminConfig>();
+
+
         private readonly IMongoCollection<TDocument> _collection;
         public Service(IOptions<DataBaseConfig> options)
         {
@@ -17,6 +24,7 @@ namespace CreateProjectOlive.Services
 
             _collection = client.GetDatabase(options.Value.Database)
             .GetCollection<TDocument>(typeof(TDocument).Name);
+
         }
         public async Task<IEnumerable<TDocument>> GetAll()
         {

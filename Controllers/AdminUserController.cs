@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 
+
+
 using CreateProjectOlive.Dtos;
 using CreateProjectOlive.Models;
 
@@ -24,6 +26,8 @@ namespace CreateProjectOlive.Controllers
             this._signInManager = signInManager;
             this._roleManager = roleManager;
             this._configuration = config;
+
+
         }
 
         [HttpPost]

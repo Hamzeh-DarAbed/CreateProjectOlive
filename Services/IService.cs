@@ -11,9 +11,9 @@ namespace CreateProjectOlive.Services
         Task<IEnumerable<TDocument>> GetAll();
         Task<TDocument> GetById(string id);
         Task Create(TDocument project);
-        
-        Task<bool> Update(string id,TDocument project);
+
+        Task<bool> Update(string id, TDocument project);
         Task<bool> Delete(string id);
     }
-    
+
 }

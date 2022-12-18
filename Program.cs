@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
 using System.Text;
 
 using CreateProjectOlive.Models;
@@ -14,8 +15,17 @@ var mongoDbSettings = builder.Configuration.GetSection("MongoDb").Get<DataBaseCo
 builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
 builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
-        .AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
+{
+    option.Password = new PasswordOptions
+    {
+        RequiredLength = 8,
+        RequireDigit = true,
+        RequireLowercase = true,
+        RequireUppercase = true,
+        RequireNonAlphanumeric = false
+    };
+}).AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
             mongoDbSettings.ConnectionString, mongoDbSettings.Database
         );
 
@@ -61,6 +71,8 @@ app.UseAuthorization();
 
 
 app.MapControllers();
+
+
 
 app.Run();
 
