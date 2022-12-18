@@ -9,15 +9,16 @@ namespace CreateProjectOlive.Dtos
     public class CreateProjectDto
     {
         [Required(ErrorMessage = "Project Name is required")]
-        public string ProjectName { get; set; }
+        public string ProjectName { get; set; }=string.Empty;
         [Required(ErrorMessage = "Project Description is required")]
-        public string ProjectDescription { get; set; }
+        public string ProjectDescription { get; set; }=string.Empty;
         [Required(ErrorMessage = "Business Type is required")]
-        public string BusinessType { get; set; }
+        public string BusinessType { get; set; }=string.Empty;
         [Required(ErrorMessage = "Created By is required")]
-        public string CreatedBy { get; set; }
+        public string CreatedBy { get; set; }=string.Empty;
         [Required(ErrorMessage = "Domain is required")]
-        public string Domain { get; set; }
+        public string Domain { get; set; }=string.Empty;
+        
         
         
     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using CreateProjectOlive.Dtos;
 using CreateProjectOlive.Models;
 using CreateProjectOlive.UnitOfWork;
@@ -14,9 +15,12 @@ namespace CreateProjectOlive.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ProjectController(IUnitOfWork unitOfWork)
+        public ProjectController(IMapper mapper,
+        IUnitOfWork unitOfWork)
         {
+            _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
 
@@ -40,7 +44,7 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
-                var project = await _unitOfWork.ProjectService.GetById(id);
+                Project project = await _unitOfWork.ProjectService.GetById(id);
 
                 if (project == null)
                 {
@@ -61,16 +65,8 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
-                var project = new Project
-                {
-                    ProjectName = projectDto.ProjectName,
-                    ProjectDescription = projectDto.ProjectDescription,
-                    BusinessType = projectDto.BusinessType,
-                    CreatedBy = projectDto.CreatedBy,
-                    Domain = projectDto.Domain,
-                    
-                };
 
+                Project project = _mapper.Map<CreateProjectDto, Project>(projectDto);
                 await _unitOfWork.ProjectService.Create(project);
 
                 return CreatedAtRoute("GetProject", new { id = project.Id.ToString() }, project);
@@ -87,19 +83,15 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
-                var project = await _unitOfWork.ProjectService.GetById(id);
+                
+                Project project = await _unitOfWork.ProjectService.GetById(id);
 
                 if (project == null)
                 {
                     return NotFound();
                 }
 
-                project.ProjectName = projectIn.ProjectName;
-                project.ProjectDescription = projectIn.ProjectDescription;
-                project.BusinessType = projectIn.BusinessType;
-                project.CreatedBy = projectIn.CreatedBy;
-                project.Domain = projectIn.Domain;
-
+                _mapper.Map(projectIn, project);
                 await _unitOfWork.ProjectService.Update(id, project);
 
                 return Ok(project);
@@ -117,7 +109,7 @@ namespace CreateProjectOlive.Controllers
             try
             {
 
-                var project = await _unitOfWork.ProjectService.GetById(id);
+                Project project = await _unitOfWork.ProjectService.GetById(id);
 
                 if (project == null)
                 {

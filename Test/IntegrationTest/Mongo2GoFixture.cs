@@ -39,7 +39,7 @@ namespace CreateProjectOlive.Test.IntegrationTest
         {
             // seed data
 
-            var project = new Project
+            Project project = new Project
             {
                 Id = "5f1b7b9b9c9d440000a1b1b5",
                 ProjectDescription = "Test Project",
@@ -51,14 +51,6 @@ namespace CreateProjectOlive.Test.IntegrationTest
 
             DataBoundCollection.InsertOne(project);
         } 
-        // GetFilePath using DockerFixture's approach
-        private string GetFilePath(string file)
-        {
-            var path = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), file);
-            return path;
-        }
-        
- 
         public void Dispose()
         {
             //DropDatabase
