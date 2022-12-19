@@ -21,7 +21,7 @@ namespace CreateProjectOlive.Helper
         }
         public void SeedAdminUserIfNotExist(IMongoCollection<ApplicationUser> UserCollection)
         {
-            bool exists = UserCollection.Find(_ => _.Email == "admin@optimumpartners.com").Any();
+            bool exists = UserCollection.Find(_ => _.Email == _admin.Email).Any();
 
             if (!exists)
             {

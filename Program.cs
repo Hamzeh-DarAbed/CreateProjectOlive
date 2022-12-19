@@ -6,7 +6,7 @@ using System.Text;
 using CreateProjectOlive.Models;
 using CreateProjectOlive.Services;
 using CreateProjectOlive.UnitOfWork;
-using CreateProjectOlive.Middleware;
+using CreateProjectOlive.SeedMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +26,12 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
         RequireUppercase = true,
         RequireNonAlphanumeric = false
     };
+
+    option.User = new UserOptions
+    {
+        RequireUniqueEmail = true,
+    };
+
 }).AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
             mongoDbSettings.ConnectionString, mongoDbSettings.Database
         );
@@ -73,9 +79,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// CreateProjectOlive.Helper.SeedToDBHelper.SeedToDataToDb();
 
-app.UseCustomMiddleware();
+app.UseSeedMiddleware();
 
 app.Run();
 
