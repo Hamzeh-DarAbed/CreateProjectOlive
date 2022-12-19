@@ -23,6 +23,8 @@ namespace CreateProjectOlive.Models
         public string CreatedBy { get; set; } = string.Empty;
         [Required(ErrorMessage = "Domain is required")]
         public string Domain { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Users is required")]
+        public ICollection<User> Users { get; set; }
 
 
     }

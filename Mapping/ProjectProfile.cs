@@ -8,9 +8,9 @@ namespace CreateProjectOlive.Mapping
     {
         public ProjectProfile()
         {
-            CreateMap<Project, CreateProjectDto>();
+            CreateMap<CreateProjectDto, Project>();
 
-            CreateMap<Project,UpdateProjectDto>();
+            CreateMap<UpdateProjectDto, Project>();
 
         }
     }

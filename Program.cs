@@ -1,4 +1,5 @@
 using AutoMapper;
+using CreateProjectOlive.Mapping;
 using CreateProjectOlive.Models;
 using CreateProjectOlive.Services;
 using CreateProjectOlive.UnitOfWork;
@@ -18,7 +19,7 @@ public class Program
 
         builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
         builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
-        builder.Services.AddAutoMapper(typeof(Program));
+        builder.Services.AddAutoMapper(typeof(ProjectProfile));
 
         builder.Services.Configure<ProjectDataBaseConfig>(builder.Configuration.GetSection("MongoDb"));
         var app = builder.Build();

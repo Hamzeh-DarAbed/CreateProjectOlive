@@ -66,15 +66,8 @@ namespace CreateProjectOlive.Controllers
             try
             {
 
-                Project project = new Project
-                {
-                    ProjectName = projectDto.ProjectName,
-                    ProjectDescription = projectDto.ProjectDescription,
-                    BusinessType = projectDto.BusinessType,
-                    CreatedBy = projectDto.CreatedBy,
-                    Domain = projectDto.Domain,
-                    
-                };
+
+                Project project = _mapper.Map<Project>(projectDto);
                 await _unitOfWork.ProjectService.Create(project);
 
                 return CreatedAtRoute("GetProject", new { id = project.Id.ToString() }, project);
@@ -99,12 +92,8 @@ namespace CreateProjectOlive.Controllers
                     return NotFound();
                 }
 
-                project.ProjectName = projectIn.ProjectName;
-                project.ProjectDescription = projectIn.ProjectDescription;
-                project.BusinessType = projectIn.BusinessType;
-                project.CreatedBy = projectIn.CreatedBy;
-                project.Domain = projectIn.Domain;
-                
+                _mapper.Map(projectIn, project);
+
                 await _unitOfWork.ProjectService.Update(id, project);
 
                 return Ok(project);

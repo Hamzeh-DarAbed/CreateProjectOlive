@@ -7,14 +7,14 @@ using Xunit;
 
 namespace CreateProjectOlive.Test.IntegrationTest
 {
-    public class Mongo2GoIntegrationTest : IClassFixture<CustomWebApplicationFactory>, IClassFixture<Mongo2GoFixture>
+    public class ProjectControllerIntegrationTest : IClassFixture<CustomWebApplicationFactory>, IClassFixture<Mongo2GoFixture>
     {
         private readonly CustomWebApplicationFactory _factory;
         private Mongo2GoFixture _mongoDb;
 
         
 
-        public Mongo2GoIntegrationTest(CustomWebApplicationFactory factory, Mongo2GoFixture mongoDb)
+        public ProjectControllerIntegrationTest(CustomWebApplicationFactory factory, Mongo2GoFixture mongoDb)
         {
             _mongoDb = mongoDb;
             _factory = factory;
