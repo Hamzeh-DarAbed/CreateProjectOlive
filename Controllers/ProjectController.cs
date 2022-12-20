@@ -29,7 +29,6 @@ namespace CreateProjectOlive.Controllers
 
         [HttpGet]
         [Route("~/GetProjects")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetProjects()
         {
             try
@@ -70,15 +69,6 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
-                var project = new Project
-                {
-                    ProjectName = projectDto.ProjectName,
-                    ProjectDescription = projectDto.ProjectDescription,
-                    BusinessType = projectDto.BusinessType,
-                    CreatedBy = projectDto.CreatedBy,
-                    Domain = projectDto.Domain,
-
-                };
 
                 Project project = _mapper.Map<Project>(projectDto);
                 await _unitOfWork.ProjectService.Create(project);

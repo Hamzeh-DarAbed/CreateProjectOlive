@@ -43,7 +43,8 @@ namespace CreateProjectOlive.Controllers
 
                 IdentityResult result = await _userManager.CreateAsync(appUser, user.Password);
                 if (result.Succeeded)
-                    return Ok("Admin User is created");
+                    // return CreatedAtRoute("api/AdminUser", appUser);
+                    return Ok("Admin Created");
                 else
                 {
                     return BadRequest(result.Errors);

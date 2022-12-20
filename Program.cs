@@ -23,6 +23,8 @@ public class Program
         builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
         builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
 
+        builder.Services.AddAutoMapper(typeof(ProjectProfile));
+
         builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
         {
             option.Password = new PasswordOptions
@@ -84,5 +86,7 @@ public class Program
 
         app.MapControllers();
 
+        app.UseSeedMiddleware();
         app.Run();
-public partial class Program { }
+    }
+}

@@ -10,23 +10,23 @@ namespace CreateProjectOlive.Test.IntegrationTest
 {
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
-        
+
         // Injects the Mongo2go configuration settings into the running application
         public WebApplicationFactory<Program> InjectMongoDbConfigurationSettings(string connectionString, string database)
         {
 
-            
+
             return WithWebHostBuilder(builder =>
             {
                 builder.UseContentRoot(".");
                 builder.ConfigureTestServices(services =>
                 {
-                    services.Configure<ProjectDataBaseConfig>(opts =>
+                    services.Configure<DataBaseConfig>(opts =>
                     {
                         opts.ConnectionString = connectionString;
                         opts.Database = database;
                     });
- 
+
                 });
             });
         }
