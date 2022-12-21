@@ -1,92 +1,89 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 
-using AutoMapper;
-using CreateProjectOlive.Mapping;
 using CreateProjectOlive.Models;
-using CreateProjectOlive.Services;
-using CreateProjectOlive.UnitOfWork;
+using CreateProjectOlive.UnitOfWorks;
+// using CreateProjectOlive.SeedMiddleware;
+using CreateProjectOlive.Context;
 using CreateProjectOlive.SeedMiddleware;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+// Add services to the container.
+
+builder.Services.AddDbContext<EF_DbContext>(
+        o => o.UseNpgsql(builder.Configuration.GetConnectionString("Ef_Postgres_Db"))
+    );
+
+
+builder.Services.AddIdentity<User, IdentityRole>(option =>
 {
-    public static void Main(string[] args)
+
+    option.Password = new PasswordOptions
     {
-        var builder = WebApplication.CreateBuilder(args);
+        RequiredLength = 8,
+        RequireDigit = true,
+        RequireLowercase = true,
+        RequireUppercase = true,
+        RequireNonAlphanumeric = false
+    };
 
-        // Add services to the container.
-        var mongoDbSettings = builder.Configuration.GetSection("MongoDb").Get<DataBaseConfig>();
-
-        // Add services to the container.
-        builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
-        builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
-
-        builder.Services.AddAutoMapper(typeof(ProjectProfile));
-
-        builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
-        {
-            option.Password = new PasswordOptions
-            {
-                RequiredLength = 8,
-                RequireDigit = true,
-                RequireLowercase = true,
-                RequireUppercase = true,
-                RequireNonAlphanumeric = false
-            };
-
-            option.User = new UserOptions
-            {
-                RequireUniqueEmail = true,
-            };
-
-        }).AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
-                    mongoDbSettings.ConnectionString, mongoDbSettings.Database
-                );
+    option.User = new UserOptions
+    {
+        RequireUniqueEmail = true,
+    };
 
 
-        builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
-        builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
-
-        builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("MongoDb"));
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidAudience = builder.Configuration["Jwt:Audience"],
-                ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-
-            };
-        });
+}).AddEntityFrameworkStores<EF_DbContext>();
 
 
-        var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 
-        app.UseHttpsRedirection();
 
-        app.UseAuthorization();
 
-        app.MapControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-        app.UseSeedMiddleware();
-        app.Run();
-    }
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+
+    };
+});
+
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+
+// //Authentication & Authorization
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// await app.UseSeedMiddleware();
+
+app.MapControllers();
+
+app.Run();
