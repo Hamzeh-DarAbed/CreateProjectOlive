@@ -8,7 +8,6 @@ using CreateProjectOlive.Models;
 using CreateProjectOlive.UnitOfWorks;
 // using CreateProjectOlive.SeedMiddleware;
 using CreateProjectOlive.Context;
-using CreateProjectOlive.SeedMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
