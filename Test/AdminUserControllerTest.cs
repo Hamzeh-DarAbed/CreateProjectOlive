@@ -1,39 +1,80 @@
 using Xunit;
-using CreateProjectOlive.Controllers;
-using Microsoft.AspNetCore.Mvc;
 using CreateProjectOlive.Dtos;
-using CreateProjectOlive.Models;
-using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
+using System.Text;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace CreateProjectOlive.Test
 {
-    public class AdminUserControllerTest : OliveTestBase
+    public class AdminUserControllerTest : TestBase
     {
-        private UserManager<User> _userManager;
-        private SignInManager<User> _signInManager;
 
-        public IConfiguration _configuration;
+        public AdminUserControllerTest(WebApplicationFactory<Program> factory) : base(factory) { }
 
-        public AdminUserControllerTest(IConfiguration config, UserManager<User> userManager, SignInManager<User> signInManager)
+        [Fact]
+        public async void TestAddAdminUser()
         {
-            _configuration = config;
-            _userManager = userManager;
-            _signInManager = signInManager;
+
+
+            AddAdminDto AddAdminDto = new AddAdminDto
+            {
+                Name = "Admin",
+                Email = "admin@admin.com",
+                Password = "Admin#adfaf123"
+            };
+
+            var HttpContent = new StringContent(JsonConvert.SerializeObject(AddAdminDto), Encoding.UTF8, "application/json");
+
+
+            using var response = await _httpClient.PostAsync("/api/AdminUser/Register", HttpContent);
+            var stringResult = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal((int)response.StatusCode, 200);
+            Assert.Equal("Admin User is created", stringResult);
         }
 
         [Fact]
         public async void TestAdminUserLogin()
         {
-            var controller = new AdminUserController(_unitOfWork, _configuration, _userManager, _signInManager);
+
 
             LoginAdminUserDto loginDto = new LoginAdminUserDto
             {
-                Email = "admin@optimumpartners.com",
-                Password = "123456"
+                Email = "admin@admin.com",
+                Password = "Admin#adfaf123"
             };
-            var response = await controller.AdminLogin(loginDto);
-            Assert.IsType<OkObjectResult>(response);
+
+            var HttpContent = new StringContent(JsonConvert.SerializeObject(loginDto), Encoding.UTF8, "application/json");
+
+
+            var response = await _httpClient.PostAsync("/api/AdminUser/Login", HttpContent);
+
+            Assert.Equal((int)response.StatusCode, 200);
+
         }
+
+        [Fact]
+        public async void TestAdminUserLoginWrongEmailOrPassword()
+        {
+            LoginAdminUserDto loginDto = new LoginAdminUserDto
+            {
+                Email = "admin@admin.com",
+                Password = "123123132"
+            };
+
+            var HttpContent = new StringContent(JsonConvert.SerializeObject(loginDto), Encoding.UTF8, "application/json");
+
+
+            var response = await _httpClient.PostAsync("/api/AdminUser/Login", HttpContent);
+            var stringResult = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal("Wrong Email Or Password", stringResult);
+            Assert.Equal((int)response.StatusCode, 400);
+        }
+
+
+
+
 
     }
 }

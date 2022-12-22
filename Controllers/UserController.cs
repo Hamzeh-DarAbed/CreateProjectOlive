@@ -74,7 +74,7 @@ namespace CreateProjectOlive.Controllers
                     Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, LoginData.Password, false, false);
                     if (result.Succeeded)
                     {
-                        var token = GenerateToken();
+                        var token = await GenerateToken(appUser);
                         return Ok(token);
                     }
                 }
@@ -85,21 +85,22 @@ namespace CreateProjectOlive.Controllers
 
 
 
-        private string GenerateToken()
+        private async Task<string> GenerateToken(User user)
         {
 
             var claims = new[] {
-                        new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+                        new Claim(JwtRegisteredClaimNames.NameId,user.Email), //modified
+                        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
 
                     };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Jwt:Key")));
             var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: _configuration.GetValue<string>("Jwt:Issuer"),
+                audience: _configuration.GetValue<string>("Jwt:Audience"),
                 claims,
                 expires: DateTime.Now.AddHours(200),
                 signingCredentials: signIn);
