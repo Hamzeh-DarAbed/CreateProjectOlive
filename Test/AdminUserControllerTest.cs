@@ -15,7 +15,7 @@ namespace CreateProjectOlive.Test
 
 
         [Fact]
-        public async Task TestAddAdminUser()
+        public async Task TestCreateAdminUser()
         {
 
             AddAdminDto AddAdminDto = new AddAdminDto
@@ -41,26 +41,7 @@ namespace CreateProjectOlive.Test
 
             LoginAdminUserDto loginDto = new LoginAdminUserDto
             {
-                Email = "admin2@admin.com",
-                Password = "Admin#adfaf123"
-            };
-
-            var HttpContent = new StringContent(JsonConvert.SerializeObject(loginDto), Encoding.UTF8, "application/json");
-
-
-            var response = await _httpClient.PostAsync("/api/AdminUser/Login", HttpContent);
-            var stringResult = await response.Content.ReadAsStringAsync();
-
-            Assert.Equal((int)response.StatusCode, 200);
-
-        }
-
-        [Fact]
-        public async Task TestAdminUserLoginWrongEmailOrPassword()
-        {
-            LoginAdminUserDto loginDto = new LoginAdminUserDto
-            {
-                Email = "admin@optimumpartners.com",
+                Email = "adminTest@adminTest.com",
                 Password = "123456"
             };
 
@@ -70,8 +51,27 @@ namespace CreateProjectOlive.Test
             var response = await _httpClient.PostAsync("/api/AdminUser/Login", HttpContent);
             var stringResult = await response.Content.ReadAsStringAsync();
 
+            Assert.Equal(200, (int)response.StatusCode);
+
+        }
+
+        [Fact]
+        public async Task TestAdminUserLoginWrongEmailOrPassword()
+        {
+            LoginAdminUserDto loginDto = new LoginAdminUserDto
+            {
+                Email = "admin@admin.com",
+                Password = "15475"
+            };
+
+            var HttpContent = new StringContent(JsonConvert.SerializeObject(loginDto), Encoding.UTF8, "application/json");
+
+
+            var response = await _httpClient.PostAsync("/api/AdminUser/Login", HttpContent);
+            var stringResult = await response.Content.ReadAsStringAsync();
+
             Assert.Equal("Wrong Email Or Password", stringResult);
-            Assert.Equal((int)response.StatusCode, 400);
+            Assert.Equal(400, (int)response.StatusCode);
         }
 
 
