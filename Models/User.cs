@@ -14,7 +14,7 @@ namespace CreateProjectOlive.Models
         public string Role { get; set; }
         public string Token { get; set; }
 
-        ICollection<Project> Projects { get; set; }
+        
 
     }
 }

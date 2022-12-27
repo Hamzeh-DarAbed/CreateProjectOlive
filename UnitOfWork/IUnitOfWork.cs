@@ -7,10 +7,10 @@ using CreateProjectOlive.Services;
 namespace CreateProjectOlive.UnitOfWork
 {
 
-    public interface IUnitOfWork
+    public interface IUnitOfWork:IDisposable
     {
-
         IProjectService ProjectService { get; }
+
 
     }
 

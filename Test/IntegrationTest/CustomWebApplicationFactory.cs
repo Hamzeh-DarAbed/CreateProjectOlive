@@ -1,34 +1,58 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CreateProjectOlive.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
+using MongoOlive.Test.IntegrationTest;
+using Microsoft.EntityFrameworkCore;
+using CreateProjectOlive.Services;
+using CreateProjectOlive.UnitOfWork;
+using AutoMapper;
 
-namespace CreateProjectOlive.Test.IntegrationTest
+public class GenericWebApplicationFactory<TStartup, TContext, TSeed>
+    : WebApplicationFactory<TStartup>
+    where TStartup : class
+    where TContext : DbContext
+    where TSeed : class, ISeedDataClass
 {
-    public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-
-        // Injects the Mongo2go configuration settings into the running application
-        public WebApplicationFactory<Program> InjectMongoDbConfigurationSettings(string connectionString, string database)
+        base.ConfigureWebHost(builder);
+        builder.UseEnvironment("Testing");
+        builder.UseContentRoot(".");
+        
+        builder.ConfigureServices(services =>
         {
+            var serviceProvider = new ServiceCollection()
+                .AddEntityFrameworkInMemoryDatabase()
+                .BuildServiceProvider();
+            services.AddScoped<ISeedDataClass, TSeed>();
 
-
-            return WithWebHostBuilder(builder =>
+            services.AddDbContext<TContext>(options =>
             {
-                builder.UseContentRoot(".");
-                builder.ConfigureTestServices(services =>
-                {
-                    services.Configure<DataBaseConfig>(opts =>
-                    {
-                        opts.ConnectionString = connectionString;
-                        opts.Database = database;
-                    });
-
-                });
+                options.UseInMemoryDatabase("InMemoryDbForTesting");
+                
             });
-        }
+            
+            
+
+
+            ServiceProvider sp = services.BuildServiceProvider();
+            using (IServiceScope scope = sp.CreateScope())
+            {
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<TContext>();
+                var logger = scopedServices.GetRequiredService<ILogger<GenericWebApplicationFactory<TStartup, TContext, TSeed>>>();
+
+                var seeder = scopedServices.GetRequiredService<ISeedDataClass>();
+
+                db.Database.EnsureCreated();
+
+                try
+                {
+                    seeder.InitializeDbForTests();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"An error occurred seeding the database with test messages. Error: {ex.Message}");
+                }
+            }
+        });
     }
 }

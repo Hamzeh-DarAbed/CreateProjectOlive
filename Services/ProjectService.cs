@@ -1,16 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CreateProjectOlive.Models;
-using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+using MongoOlive.DBContext;
+using MongoOlive.Test.IntegrationTest;
 
 namespace CreateProjectOlive.Services
 {
     public class ProjectService : Service<Project>, IProjectService
     {
-        public ProjectService(IOptions<DataBaseConfig> options) : base(options)
+        public ProjectService(ApplicationDBContext context) : base(context)
         {
         }
     }

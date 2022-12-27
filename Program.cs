@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Identity;
 using System.Text;
 
 using AutoMapper;
 using CreateProjectOlive.Mapping;
-using CreateProjectOlive.Models;
 using CreateProjectOlive.Services;
 using CreateProjectOlive.UnitOfWork;
-using CreateProjectOlive.SeedMiddleware;
+using Microsoft.EntityFrameworkCore;
+using MongoOlive.DBContext;
 
 public class Program
 {
@@ -16,43 +15,23 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-        var mongoDbSettings = builder.Configuration.GetSection("MongoDb").Get<DataBaseConfig>();
+        if (builder.Environment.EnvironmentName != "Testing")
+        {
+            builder.Services.AddDbContext<ApplicationDBContext>(options =>
+               options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // Add services to the container.
-        builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
-        builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
+        }
+
+        builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+        builder.Services.AddScoped(typeof(IProjectService), typeof(ProjectService));
 
         builder.Services.AddAutoMapper(typeof(ProjectProfile));
-
-        builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
-        {
-            option.Password = new PasswordOptions
-            {
-                RequiredLength = 8,
-                RequireDigit = true,
-                RequireLowercase = true,
-                RequireUppercase = true,
-                RequireNonAlphanumeric = false
-            };
-
-            option.User = new UserOptions
-            {
-                RequireUniqueEmail = true,
-            };
-
-        }).AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
-                    mongoDbSettings.ConnectionString, mongoDbSettings.Database
-                );
-
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
-        builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
+        builder.Services.AddSingleton(typeof(IService<>), typeof(Service<>));
 
-        builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("MongoDb"));
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -71,6 +50,7 @@ public class Program
         });
 
 
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -86,7 +66,6 @@ public class Program
 
         app.MapControllers();
 
-        app.UseSeedMiddleware();
         app.Run();
     }
 }

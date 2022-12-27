@@ -8,6 +8,8 @@ namespace CreateProjectOlive.Dtos
 {
     public class CreateProjectDto
     {
+        [Key]
+        public string Id { get; set; } = string.Empty;
         [Required(ErrorMessage = "Project Name is required")]
         public string ProjectName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Project Description is required")]

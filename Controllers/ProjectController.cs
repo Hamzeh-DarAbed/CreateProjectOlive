@@ -9,7 +9,7 @@ using CreateProjectOlive.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace CreateProjectOlive.Controllers
 {
@@ -33,8 +33,7 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
-                System.Console.WriteLine(await _unitOfWork.ProjectService.GetAll());
-                return Ok(await _unitOfWork.ProjectService.GetAll());
+                return Ok(_unitOfWork.ProjectService.FindAll());
             }
             catch (Exception e)
             {
@@ -48,7 +47,7 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
-                Project project = await _unitOfWork.ProjectService.GetById(id);
+                Project? project =  _unitOfWork.ProjectService.FindByCondition(x => x.Id.Equals(id)).FirstOrDefault();
 
                 if (project == null)
                 {
@@ -69,15 +68,15 @@ namespace CreateProjectOlive.Controllers
         {
             try
             {
-
                 Project project = _mapper.Map<Project>(projectDto);
-                await _unitOfWork.ProjectService.Create(project);
+
+                _unitOfWork.ProjectService.Create(project);
 
                 return CreatedAtRoute("GetProject", new { id = project.Id.ToString() }, project);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e.InnerException.Message);
             }
         }
 
@@ -88,16 +87,16 @@ namespace CreateProjectOlive.Controllers
             try
             {
 
-                Project project = await _unitOfWork.ProjectService.GetById(id);
+                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id.Equals(id)).FirstOrDefaultAsync();
 
                 if (project == null)
                 {
                     return NotFound();
                 }
 
-                _mapper.Map(projectIn, project);
+               _mapper.Map(projectIn, project);
 
-                await _unitOfWork.ProjectService.Update(id, project);
+                 _unitOfWork.ProjectService.Update(project);
 
                 return Ok(project);
             }
@@ -114,14 +113,14 @@ namespace CreateProjectOlive.Controllers
             try
             {
 
-                Project project = await _unitOfWork.ProjectService.GetById(id);
+                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id.Equals(id)).FirstOrDefaultAsync();
 
                 if (project == null)
                 {
                     return NotFound();
                 }
 
-                await _unitOfWork.ProjectService.Delete(id);
+                 _unitOfWork.ProjectService.Delete(project);
 
                 return NoContent();
             }

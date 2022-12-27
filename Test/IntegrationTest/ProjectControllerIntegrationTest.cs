@@ -1,196 +1,100 @@
+using System.Net;
 using System.Text;
-using AutoMapper;
-using CreateProjectOlive.Dtos;
 using CreateProjectOlive.Models;
+using Microsoft.EntityFrameworkCore;
+using MongoOlive.DBContext;
+using MongoOlive.Test.IntegrationTest;
 using Newtonsoft.Json;
 using Xunit;
 
 namespace CreateProjectOlive.Test.IntegrationTest
 {
-    public class ProjectControllerIntegrationTest : IClassFixture<CustomWebApplicationFactory>, IClassFixture<Mongo2GoFixture>
+    [Collection("InMemoryDatabase")]
+    public class ProjectControllerIntegrationTest : IClassFixture<GenericWebApplicationFactory<Program, ApplicationDBContext, SeedDataClass>>
     {
-        private readonly CustomWebApplicationFactory _factory;
-        private Mongo2GoFixture _mongoDb;
 
-        
+        private readonly GenericWebApplicationFactory<Program, ApplicationDBContext, SeedDataClass> _factory;
 
-        public ProjectControllerIntegrationTest(CustomWebApplicationFactory factory, Mongo2GoFixture mongoDb)
+        public ProjectControllerIntegrationTest(GenericWebApplicationFactory<Program, ApplicationDBContext, SeedDataClass> factory)
         {
-            _mongoDb = mongoDb;
             _factory = factory;
         }
 
-
         [Theory]
-        [InlineData("GetProjects")]
+        [InlineData("/GetProjects")]
         public async Task GetProjects_WhenProjectsExist_Returns200(string url)
         {
-            _mongoDb.SeedData();
 
-            // Arrange            
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
 
-            // Act
+            HttpClient client = _factory.CreateClient();
+
+
             HttpResponseMessage response = await client.GetAsync(url);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(200, ((int)response.StatusCode));
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Theory]
-        [InlineData("ProjectDetails/5f1b7b9b9c9d440000a1b1b5")]
-        public async Task ProjectDetails_WhenProjectExists_Returns200(string url)
+        [InlineData("/CreateProject")]
+        public async Task PostProjects_WhenProjectsExist_Returns201(string url)
         {
-            _mongoDb.SeedData();
+            var client = _factory.CreateClient();
 
-            // Arrange            
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
-
-            // Act
-            HttpResponseMessage response = await client.GetAsync(url);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(200, ((int)response.StatusCode));
-        }
-
-
-        [Theory]
-        [InlineData("CreateProject")]
-        public async Task CreateProject_WithValidData_Returns201(string url)
-        {
-
-            CreateProjectDto projectDto = new CreateProjectDto
+            var response = await client.PostAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
             {
-                ProjectName = "Test Project",
-                ProjectDescription = "Test Description",
-                BusinessType = "Test Business Type",
-                CreatedBy = "Test Created By",
-                Domain = "Test Domain"
-            };
-
-            HttpContent HttpContent = new StringContent(JsonConvert.SerializeObject(projectDto), Encoding.UTF8, "application/json");
-            // Arrange
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
-
-            // Act
-            HttpResponseMessage response = await client.PostAsync(url, HttpContent);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(201, ((int)response.StatusCode));
+                Id = "1",
+                ProjectName = "Test Blog 1",
+                BusinessType = "Test Business 1",
+                CreatedBy = "Test CreatedBy 1",
+                Domain = "Test Domain 1",
+                ProjectDescription = "Test ProjectDescription 1"
+            }), Encoding.UTF8, "application/json"));
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         }
 
         [Theory]
-        [InlineData("UpdateProject/5f1b7b9b9c9d440000a1b1b5")]
-        public async Task UpdateProject_WithValidData_Returns200(string url)
+        [InlineData("/ProjectDetails/4")]
+        public async Task GetProjectDetails_WhenProjectsExist_Returns200(string url)
         {
-            _mongoDb.SeedData();
-            Project projectDto = new Project
-            {
-                ProjectName = "Test Updated Project",
-                ProjectDescription = "Updated Description",
-                BusinessType = "Test Business Type",
-                CreatedBy = "Test Created By",
-                Domain = "Test Domain"
-            };
+            var client = _factory.CreateClient();
 
-            HttpContent HttpContent = new StringContent(JsonConvert.SerializeObject(projectDto), Encoding.UTF8, "application/json");
-            // Arrange
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
-
-            // Act
-            HttpResponseMessage response = await client.PutAsync(url, HttpContent);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(200, ((int)response.StatusCode));
+            var response = await client.GetAsync(url);
+            var result = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Theory]
-        [InlineData("DeleteProject/5f1b7b9b9c9d440000a1b1b5")]
-        public async Task DeleteProject_WhenProjectExists_Returns204(string url)
+        [InlineData("/DeleteProject/2")]
+        public async Task DeleteProject_WhenProjectsExist_Returns200(string url)
         {
-            _mongoDb.SeedData();
-            // Arrange
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
+            HttpClient client = _factory.CreateClient();
 
-            // Act
             HttpResponseMessage response = await client.DeleteAsync(url);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(204, ((int)response.StatusCode));
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
         [Theory]
-        [InlineData("ProjectDetails/5f1b7b99c9d440000a1b15")]
-        public async Task ProjectDetails_WhenProjectDoseNotExists_Returns400(string url)
+        [InlineData("/UpdateProject/3")]
+        public async Task UpdateProject_WhenProjectsExist_Returns200(string url)
         {
-            _mongoDb.SeedData();
+            HttpClient client = _factory.CreateClient();
 
-            // Arrange            
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
-
-            // Act
-            HttpResponseMessage response = await client.GetAsync(url);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(400, ((int)response.StatusCode));
-        }
-
-        [Theory]
-        [InlineData("UpdateProject/5f1b7b9c9d44000a1b15")]
-        public async Task UpdateProject_WhenProjectDoseNotExists_Returns400(string url)
-        {
-            _mongoDb.SeedData();
-            Project projectDto = new Project
+            HttpResponseMessage response = await client.PutAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
             {
-                ProjectName = "Test Updated Project",
-                ProjectDescription = "Updated Description",
-                BusinessType = "Test Business Type",
-                CreatedBy = "Test Created By",
-                Domain = "Test Domain"
-            };
-
-            HttpContent HttpContent = new StringContent(JsonConvert.SerializeObject(projectDto), Encoding.UTF8, "application/json");
-            // Arrange
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
-
-            // Act
-            HttpResponseMessage response = await client.PutAsync(url, HttpContent);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(400, ((int)response.StatusCode));
+                
+                ProjectName = "Updated Test Blog 3",
+                BusinessType = "Updated Test Business 3",
+                CreatedBy = "Updated Test CreatedBy 3",
+                Domain = "Updated Test Domain 3",
+                ProjectDescription = "Updated Test ProjectDescription 3"
+            }), Encoding.UTF8, "application/json"));
+            var result = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
-
-        [Theory]
-        [InlineData("DeleteProject/5f1b7b99c94000a1b15")]
-        public async Task DeleteProject_WhenProjectDoseNotExists_Returns400(string url)
-        {
-            _mongoDb.SeedData();
-            // Arrange
-            HttpClient client = _factory.InjectMongoDbConfigurationSettings(_mongoDb.ConnectionString, _mongoDb.Database.DatabaseNamespace.DatabaseName).CreateClient();
-
-            // Act
-            HttpResponseMessage response = await client.DeleteAsync(url);
-
-            _mongoDb.Database.DropCollection("Project");
-
-            // Assert
-            Assert.Equal(400, ((int)response.StatusCode));
-        }
-
 
 
     }
