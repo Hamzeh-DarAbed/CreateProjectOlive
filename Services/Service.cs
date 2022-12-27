@@ -1,58 +1,91 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CreateProjectOlive.Models;
-using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+using MongoOlive.DBContext;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace CreateProjectOlive.Services
 {
-    public class Service<TDocument> : IService<TDocument> where TDocument : class
+    public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
-        private readonly IMongoCollection<TDocument> _collection;
-        public Service(IOptions<ProjectDataBaseConfig> options)
-        {
-            MongoClient client = new MongoClient(options.Value.ConnectionString);
+        protected readonly ApplicationDBContext _context;
+        protected readonly DbSet<TEntity> _dbSet;
 
-            _collection = client.GetDatabase(options.Value.Database)
-            .GetCollection<TDocument>(typeof(TDocument).Name);
-        }
-        public async Task<IEnumerable<TDocument>> GetAll()
+        public Service(ApplicationDBContext context)
         {
-
-            return await _collection.Find(p => true).ToListAsync();
+            _context = context;
+            _dbSet = _context.Set<TEntity>();
         }
 
-        public async Task<TDocument> GetById(string id)
+        public void Create(TEntity entity)
         {
-            FilterDefinition<TDocument> filter = Builders<TDocument>.Filter.Eq("Id", id);
-            return await _collection.FindAsync(filter).Result.FirstOrDefaultAsync();
+            try
+            {
+                _dbSet.Add(entity);
+
+                _context.SaveChanges();
+
+            }
+            catch (System.Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public void Delete(TEntity entity)
+        {
+            try
+            {
+                _context.Remove(entity);
+                _context.SaveChanges();
+            }
+            catch (System.Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public IQueryable<TEntity> FindAll()
+        {
+            try
+            {
+                return _dbSet.AsQueryable();
+            }
+            catch (System.Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public IQueryable<TEntity> FindByCondition(Expression<Func<TEntity, bool>> expression)
+        {
+            try
+            {
+                return _dbSet.Where(expression).AsQueryable();
+            }
+            catch (System.Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public void Update(TEntity entity)
+        {
+            try
+            {
+                _dbSet.Update(entity);
+                _context.SaveChanges();
+            }
+            catch (System.Exception ex)
+            {
+
+                throw ex;
+            }
         }
 
 
-        public async Task Create(TDocument document)
-        {
 
-            await _collection.InsertOneAsync(document);
-        }
-
-        public async Task<bool> Update(string id, TDocument document)
-        {
-            
-
-            FilterDefinition<TDocument> filter = Builders<TDocument>.Filter.Eq("Id", id);
-
-            ReplaceOneResult result = await _collection.ReplaceOneAsync(filter, document);
-            return result.IsAcknowledged && result.ModifiedCount > 0;
-        }
-
-        public async Task<bool> Delete(string id)
-        {
-            FilterDefinition<TDocument> filter = Builders<TDocument>.Filter.Eq("Id", id);
-            DeleteResult result = await _collection.DeleteOneAsync(filter);
-            return result.IsAcknowledged && result.DeletedCount > 0;
-
-        }
     }
 }

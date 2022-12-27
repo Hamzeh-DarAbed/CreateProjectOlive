@@ -8,6 +8,9 @@ using CreateProjectOlive.Models;
 using CreateProjectOlive.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+
 namespace CreateProjectOlive.Controllers
 {
     [ApiController]
@@ -26,11 +29,11 @@ namespace CreateProjectOlive.Controllers
 
         [HttpGet]
         [Route("~/GetProjects")]
-        public async Task<IActionResult> GetProjects()
+        public IActionResult GetProjects()
         {
             try
             {
-                return Ok(await _unitOfWork.ProjectService.GetAll());
+                return Ok(_unitOfWork.ProjectService.FindAll());
             }
             catch (Exception e)
             {
@@ -40,11 +43,11 @@ namespace CreateProjectOlive.Controllers
 
         [HttpGet]
         [Route("~/ProjectDetails/{id}", Name = "GetProject")]
-        public async Task<IActionResult> ProjectDetails(string id)
+        public IActionResult ProjectDetails(Guid id)
         {
             try
             {
-                Project project = await _unitOfWork.ProjectService.GetById(id);
+                Project? project = _unitOfWork.ProjectService.FindByCondition(x => x.Id == id).FirstOrDefault();
 
                 if (project == null)
                 {
@@ -61,38 +64,39 @@ namespace CreateProjectOlive.Controllers
 
         [HttpPost]
         [Route("~/CreateProject")]
-        public async Task<IActionResult> CreateProject(CreateProjectDto projectDto)
+        public IActionResult CreateProject(CreateProjectDto projectDto)
         {
             try
             {
+                Project project = _mapper.Map<Project>(projectDto);
 
-                Project project = _mapper.Map<CreateProjectDto, Project>(projectDto);
-                await _unitOfWork.ProjectService.Create(project);
+                _unitOfWork.ProjectService.Create(project);
 
                 return CreatedAtRoute("GetProject", new { id = project.Id.ToString() }, project);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(e.InnerException.Message);
             }
         }
 
         [HttpPut]
         [Route("~/UpdateProject/{id}")]
-        public async Task<IActionResult> UpdateProject(string id, UpdateProjectDto projectIn)
+        public async Task<IActionResult> UpdateProject(Guid id, UpdateProjectDto projectIn)
         {
             try
             {
-                
-                Project project = await _unitOfWork.ProjectService.GetById(id);
+
+                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id == id).FirstOrDefaultAsync();
 
                 if (project == null)
                 {
                     return NotFound();
                 }
 
-                _mapper.Map(projectIn, project);
-                await _unitOfWork.ProjectService.Update(id, project);
+               _mapper.Map(projectIn, project);
+
+                 _unitOfWork.ProjectService.Update(project);
 
                 return Ok(project);
             }
@@ -104,19 +108,19 @@ namespace CreateProjectOlive.Controllers
 
         [HttpDelete]
         [Route("~/DeleteProject/{id}")]
-        public async Task<IActionResult> DeleteProject(string id)
+        public async Task<IActionResult> DeleteProject(Guid id)
         {
             try
             {
 
-                Project project = await _unitOfWork.ProjectService.GetById(id);
+                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id == id).FirstOrDefaultAsync();
 
                 if (project == null)
                 {
                     return NotFound();
                 }
 
-                await _unitOfWork.ProjectService.Delete(id);
+                 _unitOfWork.ProjectService.Delete(project);
 
                 return NoContent();
             }
