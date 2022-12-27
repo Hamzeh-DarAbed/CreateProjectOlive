@@ -14,13 +14,10 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddDbContext<ApplicationDBContext>(options =>
+                     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        if (builder.Environment.EnvironmentName != "Testing")
-        {
-            builder.Services.AddDbContext<ApplicationDBContext>(options =>
-               options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        }
 
         builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
         builder.Services.AddScoped(typeof(IProjectService), typeof(ProjectService));

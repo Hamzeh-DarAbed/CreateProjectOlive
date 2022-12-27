@@ -29,7 +29,7 @@ namespace CreateProjectOlive.Controllers
 
         [HttpGet]
         [Route("~/GetProjects")]
-        public async Task<IActionResult> GetProjects()
+        public IActionResult GetProjects()
         {
             try
             {
@@ -43,11 +43,11 @@ namespace CreateProjectOlive.Controllers
 
         [HttpGet]
         [Route("~/ProjectDetails/{id}", Name = "GetProject")]
-        public async Task<IActionResult> ProjectDetails(string id)
+        public IActionResult ProjectDetails(Guid id)
         {
             try
             {
-                Project? project =  _unitOfWork.ProjectService.FindByCondition(x => x.Id.Equals(id)).FirstOrDefault();
+                Project? project = _unitOfWork.ProjectService.FindByCondition(x => x.Id == id).FirstOrDefault();
 
                 if (project == null)
                 {
@@ -64,7 +64,7 @@ namespace CreateProjectOlive.Controllers
 
         [HttpPost]
         [Route("~/CreateProject")]
-        public async Task<IActionResult> CreateProject(CreateProjectDto projectDto)
+        public IActionResult CreateProject(CreateProjectDto projectDto)
         {
             try
             {
@@ -82,12 +82,12 @@ namespace CreateProjectOlive.Controllers
 
         [HttpPut]
         [Route("~/UpdateProject/{id}")]
-        public async Task<IActionResult> UpdateProject(string id, UpdateProjectDto projectIn)
+        public async Task<IActionResult> UpdateProject(Guid id, UpdateProjectDto projectIn)
         {
             try
             {
 
-                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id == id).FirstOrDefaultAsync();
 
                 if (project == null)
                 {
@@ -108,12 +108,12 @@ namespace CreateProjectOlive.Controllers
 
         [HttpDelete]
         [Route("~/DeleteProject/{id}")]
-        public async Task<IActionResult> DeleteProject(string id)
+        public async Task<IActionResult> DeleteProject(Guid id)
         {
             try
             {
 
-                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+                Project? project = await _unitOfWork.ProjectService.FindByCondition(x => x.Id == id).FirstOrDefaultAsync();
 
                 if (project == null)
                 {

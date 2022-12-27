@@ -4,8 +4,8 @@ namespace CreateProjectOlive.Models
 {
     public record Project
     {
-        
-        public string Id { get; set; } 
+        [Key]
+        public Guid Id { get; set; } 
         [Required(ErrorMessage = "Project Name is required")]
         public string ProjectName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Project Description is required")]

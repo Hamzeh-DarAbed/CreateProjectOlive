@@ -1,58 +1,77 @@
+using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
-using MongoOlive.Test.IntegrationTest;
 using Microsoft.EntityFrameworkCore;
-using CreateProjectOlive.Services;
-using CreateProjectOlive.UnitOfWork;
-using AutoMapper;
+using CreateProjectOlive.Models;
+using MongoOlive.DBContext;
 
-public class GenericWebApplicationFactory<TStartup, TContext, TSeed>
-    : WebApplicationFactory<TStartup>
-    where TStartup : class
-    where TContext : DbContext
-    where TSeed : class, ISeedDataClass
+namespace CreateProjectOlive.Test
 {
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    public class CustomWebApplicationFactory<TEntryPoint> : WebApplicationFactory<Program> where TEntryPoint : Program
     {
-        base.ConfigureWebHost(builder);
-        builder.UseEnvironment("Testing");
-        builder.UseContentRoot(".");
-        
-        builder.ConfigureServices(services =>
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            var serviceProvider = new ServiceCollection()
-                .AddEntityFrameworkInMemoryDatabase()
-                .BuildServiceProvider();
-            services.AddScoped<ISeedDataClass, TSeed>();
+            var projectDir = Directory.GetCurrentDirectory();
 
-            services.AddDbContext<TContext>(options =>
+           builder.UseContentRoot(projectDir);
+
+            builder.ConfigureServices(services =>
             {
-                options.UseInMemoryDatabase("InMemoryDbForTesting");
-                
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType ==
+                        typeof(DbContextOptions<ApplicationDBContext>));
+
+                if (descriptor != null)
+                    services.Remove(descriptor);
+
+                var serviceProvider = new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
+                services.AddDbContext<ApplicationDBContext>(options =>
+                {
+                    options.UseInMemoryDatabase("InMemoryDataBase");
+                    options.UseInternalServiceProvider(serviceProvider);
+
+                });
+
+
+                var sp = services.BuildServiceProvider();
+                using (var scope = sp.CreateScope())
+                using (var appContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>())
+                {
+                    try
+                    {
+                        appContext.Database.EnsureCreated();
+                        Seed(appContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
             });
-            
-            
+        }
 
-
-            ServiceProvider sp = services.BuildServiceProvider();
-            using (IServiceScope scope = sp.CreateScope())
+        public virtual void Seed(ApplicationDBContext _context)
+        {
+            _context.Projects.Add(new Project
             {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<TContext>();
-                var logger = scopedServices.GetRequiredService<ILogger<GenericWebApplicationFactory<TStartup, TContext, TSeed>>>();
+                Id = Guid.Parse("85d05ebb-6cfc-435a-a7c6-ae92a553431b"),
+                ProjectName = "Test Project",
+                ProjectDescription = "Test Project Description",
+                BusinessType = "Test Business Type",
+                CreatedBy = "Test Created By",
+                Domain = "Test Domain",
+            });
 
-                var seeder = scopedServices.GetRequiredService<ISeedDataClass>();
+            _context.Projects.Add(new Project
+            {
+                Id = Guid.Parse("85d05ebb-6cfc-435a-a7c6-ae92a553431c"),
+                ProjectName = "Test Project 2",
+                ProjectDescription = "Test Project Description 2",
+                BusinessType = "Test Business Type 2",
+                CreatedBy = "Test Created By 2",
+                Domain = "Test Domain 2",
+            });
 
-                db.Database.EnsureCreated();
-
-                try
-                {
-                    seeder.InitializeDbForTests();
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, $"An error occurred seeding the database with test messages. Error: {ex.Message}");
-                }
-            }
-        });
+            _context.SaveChanges();
+        }
     }
 }
