@@ -6,20 +6,22 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace CreateProjectOlive.Test
 {
-    public class AdminUserControllerTest : TestBase
+    public class AdminUserControllerTest : IClassFixture<TestingWebAppFactory<Program>>
     {
 
-        public AdminUserControllerTest(WebApplicationFactory<Program> factory) : base(factory) { }
+        private readonly HttpClient _httpClient;
+        public AdminUserControllerTest(TestingWebAppFactory<Program> factory)
+            => _httpClient = factory.CreateClient();
+
 
         [Fact]
-        public async void TestAddAdminUser()
+        public async Task TestAddAdminUser()
         {
-
 
             AddAdminDto AddAdminDto = new AddAdminDto
             {
-                Name = "Admin",
-                Email = "admin@admin.com",
+                Name = "Admin2",
+                Email = "admin2@admin.com",
                 Password = "Admin#adfaf123"
             };
 
@@ -29,18 +31,17 @@ namespace CreateProjectOlive.Test
             using var response = await _httpClient.PostAsync("/api/AdminUser/Register", HttpContent);
             var stringResult = await response.Content.ReadAsStringAsync();
 
-            Assert.Equal((int)response.StatusCode, 200);
             Assert.Equal("Admin User is created", stringResult);
         }
 
         [Fact]
-        public async void TestAdminUserLogin()
+        public async Task TestAdminUserLogin()
         {
 
 
             LoginAdminUserDto loginDto = new LoginAdminUserDto
             {
-                Email = "admin@admin.com",
+                Email = "admin2@admin.com",
                 Password = "Admin#adfaf123"
             };
 
@@ -48,18 +49,19 @@ namespace CreateProjectOlive.Test
 
 
             var response = await _httpClient.PostAsync("/api/AdminUser/Login", HttpContent);
+            var stringResult = await response.Content.ReadAsStringAsync();
 
             Assert.Equal((int)response.StatusCode, 200);
 
         }
 
         [Fact]
-        public async void TestAdminUserLoginWrongEmailOrPassword()
+        public async Task TestAdminUserLoginWrongEmailOrPassword()
         {
             LoginAdminUserDto loginDto = new LoginAdminUserDto
             {
-                Email = "admin@admin.com",
-                Password = "123123132"
+                Email = "admin@optimumpartners.com",
+                Password = "123456"
             };
 
             var HttpContent = new StringContent(JsonConvert.SerializeObject(loginDto), Encoding.UTF8, "application/json");

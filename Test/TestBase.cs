@@ -6,40 +6,51 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CreateProjectOlive.Test
 {
-    public class TestBase : IClassFixture<WebApplicationFactory<Program>>
+    public class TestingWebAppFactory<TEntryPoint> : WebApplicationFactory<Program> where TEntryPoint : Program
     {
-        public HttpClient _httpClient;
-        public WebApplicationFactory<Program> _factory;
-
-
-        public TestBase(WebApplicationFactory<Program> factory)
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            _factory = factory;
-            _httpClient = factory.WithWebHostBuilder(host =>
-            {
-                var projectDir = Directory.GetCurrentDirectory();
-                var configPath = Path.Combine(projectDir, "appsettings.test.json");
+            var projectDir = Directory.GetCurrentDirectory();
+            var configPath = Path.Combine(projectDir, "appsettings.test.json");
 
-                host.ConfigureAppConfiguration((context, conf) =>
-                    {
-                        conf.AddJsonFile(configPath);
-                    });
-
-                host.ConfigureServices(services =>
+            builder.ConfigureAppConfiguration((context, conf) =>
                 {
-                    var descriptor = services.SingleOrDefault(
-                        d => d.ServiceType ==
-                    typeof(DbContextOptions<EF_DbContext>));
-                    services.Remove(descriptor!);
+                    conf.AddJsonFile(configPath);
+                });
 
-                    services.AddDbContext<EF_DbContext>(options =>
-                    {
-                        options.UseInMemoryDatabase("InMemoryDB");
-                    });
+            builder.ConfigureServices(services =>
+            {
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType ==
+                        typeof(DbContextOptions<EF_DbContext>));
 
+                if (descriptor != null)
+                    services.Remove(descriptor);
+
+                var serviceProvider = new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
+                services.AddDbContext<EF_DbContext>(options =>
+                {
+                    options.UseInMemoryDatabase("InMemoryEmployeeTest223");
+                    options.UseInternalServiceProvider(serviceProvider);
 
                 });
-            }).CreateClient();
+
+
+                var sp = services.BuildServiceProvider();
+                using (var scope = sp.CreateScope())
+                using (var appContext = scope.ServiceProvider.GetRequiredService<EF_DbContext>())
+                {
+                    try
+                    {
+                        appContext.Database.EnsureCreated();
+                    }
+                    catch (Exception ex)
+                    {
+                        //Log errors or do anything you think it's needed
+                        throw ex;
+                    }
+                }
+            });
         }
     }
 }
