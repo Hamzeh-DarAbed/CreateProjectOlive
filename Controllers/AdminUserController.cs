@@ -17,37 +17,117 @@ namespace CreateProjectOlive.Controllers
     {
         private UserManager<User> _userManager;
         private SignInManager<User> _signInManager;
+        private RoleManager<IdentityRole> _roleManager;
 
         public IConfiguration _configuration;
-        private IUnitOfWork _unitOfWork;
-        public AdminUserController(IUnitOfWork unitOfWork, IConfiguration config, UserManager<User> userManager, SignInManager<User> signInManager)
+        public AdminUserController(IConfiguration config, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
         {
-            _unitOfWork = unitOfWork;
             _configuration = config;
             _userManager = userManager;
             _signInManager = signInManager;
-
-
+            _roleManager = roleManager;
         }
 
         [HttpPost]
-        [Route("Register")]
+        [Route("RegisterSuperAdmin")]
         public async Task<IActionResult> Post([FromBody] AddAdminDto user)
         {
             if (ModelState.IsValid)
             {
                 User appUser = new User
                 {
-                    UserName = user.Name,
+                    UserName = user.UserName,
                     Email = user.Email
                 };
                 try
                 {
                     IdentityResult result = await _userManager.CreateAsync(appUser, user.Password);
-                    // await _unitOfWork.SaveAsync();
-                    // return Ok("userCreated");
                     if (result.Succeeded)
-                        return Ok("Admin User is created");
+                    {
+                        var AdminRole = await _roleManager.FindByNameAsync("SuperAdmin");
+                        if (AdminRole != null)
+                        {
+                            IdentityResult roleResult = await _userManager.AddToRoleAsync(appUser, AdminRole.Name);
+                            if (roleResult.Succeeded)
+                            {
+                                return Ok("Admin User is created");
+                            }
+                            else
+                            {
+                                return BadRequest(roleResult.Errors);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest(result.Errors);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex);
+                }
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("LoginSuperAdmin")]
+        public async Task<IActionResult> AdminLogin(LoginAdminUserDto LoginData)
+        {
+            if (ModelState.IsValid)
+            {
+                User appUser = await _userManager.FindByEmailAsync(LoginData.Email);
+                if (appUser != null)
+                {
+                    Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, LoginData.Password, false, false);
+                    if (result.Succeeded)
+                    {
+                        var role = await _userManager.GetRolesAsync(appUser);
+                        if (role.Contains("SuperAdmin"))
+                        {
+                            var token = GenerateToken(appUser);
+                            return Ok(token);
+                        }
+                    }
+                }
+                return BadRequest("Wrong Email Or Password");
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("CreateBusinessOwner")]
+        public async Task<IActionResult> CreateUser([FromBody] AddUserDto user)
+        {
+            if (ModelState.IsValid)
+            {
+                User appUser = new User
+                {
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                };
+                try
+                {
+                    IdentityResult result = await _userManager.CreateAsync(appUser, user.Password);
+                    if (result.Succeeded)
+                    {
+                        var AdminRole = _roleManager.FindByNameAsync("BusinessOwner").Result;
+                        if (AdminRole != null)
+                        {
+                            IdentityResult roleResult = await _userManager.AddToRoleAsync(appUser, AdminRole.Name);
+                            if (roleResult.Succeeded)
+                            {
+
+                                return Ok("User is created");
+                            }
+                            else
+                            {
+                                return BadRequest(roleResult.Errors);
+                            }
+                        }
+                    }
                     else
                     {
                         return BadRequest(result.Errors);
@@ -62,30 +142,7 @@ namespace CreateProjectOlive.Controllers
             return BadRequest();
         }
 
-        [HttpPost]
-        [Route("Login")]
-        public async Task<IActionResult> AdminLogin(LoginAdminUserDto LoginData)
-        {
-            if (ModelState.IsValid)
-            {
-                User appUser = await _userManager.FindByEmailAsync(LoginData.Email);
-                if (appUser != null)
-                {
-                    Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, LoginData.Password, false, false);
-                    if (result.Succeeded)
-                    {
-                        var token = await GenerateToken(appUser);
-                        return Ok(token);
-                    }
-                }
-                return BadRequest("Wrong Email Or Password");
-            }
-            return BadRequest();
-        }
-
-
-
-        private async Task<string> GenerateToken(User user)
+        private string GenerateToken(User user)
         {
 
             var claims = new[] {
