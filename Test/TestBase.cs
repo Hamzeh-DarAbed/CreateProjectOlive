@@ -3,11 +3,15 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using CreateProjectOlive.Context;
 using Microsoft.EntityFrameworkCore;
 using CreateProjectOlive.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace CreateProjectOlive.Test
 {
+
     public class TestingWebAppFactory<TEntryPoint> : WebApplicationFactory<Program> where TEntryPoint : Program
     {
+
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             var projectDir = Directory.GetCurrentDirectory();
@@ -47,27 +51,39 @@ namespace CreateProjectOlive.Test
                     }
                     catch (Exception ex)
                     {
-                        throw ex;
+                        throw new Exception("Seed Data Failed", ex);
                     }
                 }
             });
         }
 
-        public virtual void Seed(EF_DbContext _context)
+        public virtual async void Seed(EF_DbContext _context)
         {
-            var user = new[]{
+            var user =
+
                 new User
                 {
+                    Id = Guid.NewGuid().ToString(),
                     UserName = "AdminTest",
-                    NormalizedUserName = "ADMIN",
+                    NormalizedUserName = "ADMINTEST",
                     Email = "adminTest@adminTest.com",
                     NormalizedEmail = "ADMINTEST@ADMINTEST.COM",
                     PasswordHash = "AQAAAAEAACcQAAAAEI99MKFTBxu+rmOvvm8PZbXbVHCLtDa57L+/ZS/68kKU6e0OcP5Sg+U6+TYJ3s1yFg==",
                     SecurityStamp = "P4HECIURGID4GGDNIUF24PQTFTTYDCER"
-                }
-        };
+                };
 
-            _context.Users!.AddRange(user);
+            var SuperAdminRole = _context.Roles.Where(a => a.Name == "SuperAdmin").FirstOrDefault();
+
+
+            var identityUserRole = new IdentityUserRole<string>()
+            {
+                UserId = user.Id,
+                RoleId = SuperAdminRole!.Id
+
+            };
+
+            await _context.Users.AddAsync(user);
+            await _context.UserRoles.AddAsync(identityUserRole);
 
             _context.SaveChanges();
         }
