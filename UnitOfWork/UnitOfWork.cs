@@ -1,26 +1,39 @@
+using CreateProjectOlive.Context;
+using CreateProjectOlive.Repositories;
 using CreateProjectOlive.Services;
-using MongoOlive.DBContext;
 
-namespace CreateProjectOlive.UnitOfWork
+namespace CreateProjectOlive.UnitOfWorks
 {
+
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly ApplicationDBContext _context;
-        private readonly IConfiguration _config;
-        public IProjectService ProjectService { get; }
+        private EF_DbContext _context;
 
-
-        public UnitOfWork(ApplicationDBContext context, IConfiguration config)
+        public UnitOfWork(EF_DbContext EF_DBContext)
         {
-            _context = context;
-            _config = config;
-            ProjectService = new ProjectService(_context);
+            this._context = EF_DBContext;
+            this.User = new UserRepository(this._context);
+            this.ProjectService = new ProjectService(this._context);
         }
 
-        
+        public IUserRepository User
+        {
+            get;
+        }
+
+        public IProjectService ProjectService
+        {
+            get;
+        }
+
         public void Dispose()
         {
             _context.Dispose();
+        }
+        public async Task<int> SaveAsync()
+        {
+            _context.Dispose();
+            return await _context.SaveChangesAsync();
         }
     }
 

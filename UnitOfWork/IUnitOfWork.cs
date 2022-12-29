@@ -1,17 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using CreateProjectOlive.Repositories;
 using CreateProjectOlive.Services;
 
-namespace CreateProjectOlive.UnitOfWork
+namespace CreateProjectOlive.UnitOfWorks
 {
 
-    public interface IUnitOfWork:IDisposable
+    public interface IUnitOfWork : IDisposable
     {
+
         IProjectService ProjectService { get; }
+        IUserRepository User
+        {
+            get;
+        }
+
+        Task<int> SaveAsync();
 
 
+        public void Dispose();
     }
 
 

@@ -1,21 +1,22 @@
-using MongoOlive.DBContext;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using CreateProjectOlive.Context;
+using CreateProjectOlive.Models;
 
 namespace CreateProjectOlive.Services
 {
     public class Service<TEntity> : IService<TEntity> where TEntity : class
     {
-        protected readonly ApplicationDBContext _context;
+        protected readonly EF_DbContext _context;
         protected readonly DbSet<TEntity> _dbSet;
 
-        public Service(ApplicationDBContext context)
+        public Service(EF_DbContext context)
         {
             _context = context;
             _dbSet = _context.Set<TEntity>();
         }
 
-        public void Create(TEntity entity)
+        public virtual void Create(TEntity entity, User? user)
         {
             try
             {

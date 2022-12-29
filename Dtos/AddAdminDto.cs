@@ -4,8 +4,8 @@ namespace CreateProjectOlive.Dtos
 {
     public class AddAdminDto
     {
-        [Required]
-        public string Name { get; set; } = null!;
+        [Required(ErrorMessage = "UserName is required")]
+        public string UserName { get; set; } = null!;
 
         [Required]
         [EmailAddress(ErrorMessage = "Invalid Email")]

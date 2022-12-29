@@ -10,7 +10,6 @@ namespace CreateProjectOlive.Mapping
         {
             CreateMap<CreateProjectDto, Project>();
 
-            CreateMap<UpdateProjectDto, Project>();
 
         }
     }

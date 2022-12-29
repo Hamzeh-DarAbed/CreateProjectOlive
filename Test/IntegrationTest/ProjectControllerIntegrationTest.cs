@@ -9,25 +9,20 @@ namespace CreateProjectOlive.Test.IntegrationTest
     public class ProjectControllerIntegrationTest : IClassFixture<CustomWebApplicationFactory<Program>>
     {
 
-        private readonly  CustomWebApplicationFactory<Program> _factory;
+        private readonly HttpClient _factory;
 
         public ProjectControllerIntegrationTest(CustomWebApplicationFactory<Program> factory)
         {
-            _factory = factory;
+            _factory = factory.CreateClient();
         }
 
         [Theory]
         [InlineData("/GetProjects")]
         public async Task GetProjects_WhenProjectsExist_Returns200(string url)
         {
-
-
-            HttpClient client = _factory.CreateClient();
-
-
-            HttpResponseMessage response = await client.GetAsync(url);
+            HttpResponseMessage response = await _factory.GetAsync(url);
             response.EnsureSuccessStatusCode();
-            var result= await response.Content.ReadAsStringAsync();
+            var result = await response.Content.ReadAsStringAsync();
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
@@ -35,12 +30,11 @@ namespace CreateProjectOlive.Test.IntegrationTest
         [InlineData("/CreateProject")]
         public async Task PostProjects_WhenProjectsExist_Returns201(string url)
         {
-            HttpClient client = _factory.CreateClient();
 
-            HttpResponseMessage response = await client.PostAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
+            HttpResponseMessage response = await _factory.PostAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
             {
-                
-                Id= Guid.NewGuid(),
+
+                Id = Guid.NewGuid(),
                 ProjectName = "Test Blog 1",
                 BusinessType = "Test Business 1",
                 CreatedBy = "Test CreatedBy 1",
@@ -55,9 +49,8 @@ namespace CreateProjectOlive.Test.IntegrationTest
         [InlineData("/ProjectDetails/85d05ebb-6cfc-435a-a7c6-ae92a553431c")]
         public async Task GetProjectDetails_WhenProjectsExist_Returns200(string url)
         {
-            HttpClient client = _factory.CreateClient();
 
-            HttpResponseMessage response = await client.GetAsync(url);
+            HttpResponseMessage response = await _factory.GetAsync(url);
             response.EnsureSuccessStatusCode();
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
@@ -66,9 +59,8 @@ namespace CreateProjectOlive.Test.IntegrationTest
         [InlineData("/DeleteProject/85d05ebb-6cfc-435a-a7c6-ae92a553431b")]
         public async Task DeleteProject_WhenProjectsExist_Returns200(string url)
         {
-            HttpClient client = _factory.CreateClient();
 
-            HttpResponseMessage response = await client.DeleteAsync(url);
+            HttpResponseMessage response = await _factory.DeleteAsync(url);
             response.EnsureSuccessStatusCode();
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
@@ -77,11 +69,10 @@ namespace CreateProjectOlive.Test.IntegrationTest
         [InlineData("/UpdateProject/85d05ebb-6cfc-435a-a7c6-ae92a553431b")]
         public async Task UpdateProject_WhenProjectsExist_Returns200(string url)
         {
-            HttpClient client = _factory.CreateClient();
 
-            HttpResponseMessage response = await client.PutAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
+            HttpResponseMessage response = await _factory.PutAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
             {
-                
+
                 ProjectName = "Updated Test Blog 3",
                 BusinessType = "Updated Test Business 3",
                 CreatedBy = "Updated Test CreatedBy 3",
@@ -97,9 +88,8 @@ namespace CreateProjectOlive.Test.IntegrationTest
         [InlineData("/ProjectDetails/85d05ebb-6cfc-435a-a7c6-ae92a563431b")]
         public async Task GetProjectDetails_WhenProjectsNotExist_Returns404(string url)
         {
-            HttpClient client = _factory.CreateClient();
 
-            HttpResponseMessage response = await client.GetAsync(url);
+            HttpResponseMessage response = await _factory.GetAsync(url);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -107,9 +97,8 @@ namespace CreateProjectOlive.Test.IntegrationTest
         [InlineData("/DeleteProject/85d05ebb-6cfc-435a-a7c6-ae92a563431b")]
         public async Task DeleteProject_WhenProjectsNotExist_Returns404(string url)
         {
-            HttpClient client = _factory.CreateClient();
 
-            HttpResponseMessage response = await client.DeleteAsync(url);
+            HttpResponseMessage response = await _factory.DeleteAsync(url);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -117,11 +106,10 @@ namespace CreateProjectOlive.Test.IntegrationTest
         [InlineData("/UpdateProject/85d05ebb-6cfc-435a-a7c6-ae92a563431b")]
         public async Task UpdateProject_WhenProjectsNotExist_Returns404(string url)
         {
-            HttpClient client = _factory.CreateClient();
 
-            HttpResponseMessage response = await client.PutAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
+            HttpResponseMessage response = await _factory.PutAsync(url, new StringContent(JsonConvert.SerializeObject(new Project
             {
-                
+
                 ProjectName = "Updated Test Blog 3",
                 BusinessType = "Updated Test Business 3",
                 CreatedBy = "Updated Test CreatedBy 3",
