@@ -2,6 +2,7 @@ using Xunit;
 using CreateProjectOlive.Dtos;
 using Newtonsoft.Json;
 using System.Text;
+using CreateProjectOlive.Models;
 
 namespace CreateProjectOlive.Test
 {
@@ -9,15 +10,18 @@ namespace CreateProjectOlive.Test
     {
 
         private readonly HttpClient _httpClient;
+
         public AdminUserControllerTest(TestingWebAppFactory<Program> factory)
-            => _httpClient = factory.CreateClient();
+        {
+
+            _httpClient = factory.CreateClient();
+
+        }
 
 
         [Fact]
         public async Task TestAdminUserLogin()
         {
-
-
             LoginAdminUserDto loginDto = new LoginAdminUserDto
             {
                 Email = "adminTest@adminTest.com",

@@ -1,4 +1,3 @@
-using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
 using CreateProjectOlive.Context;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +35,6 @@ namespace CreateProjectOlive.Test
                 {
                     options.UseInMemoryDatabase("InMemoryDataBase");
                     options.UseInternalServiceProvider(serviceProvider);
-
                 });
 
 

@@ -38,8 +38,11 @@ builder.Services.AddIdentity<User, IdentityRole>(option =>
 }).AddEntityFrameworkStores<EF_DbContext>();
 
 
+builder.Services.Configure<SeedIdentityUserOptions>(builder.Configuration.GetSection("Admin"));
+builder.Services.Configure<SeedRoleOptions>(builder.Configuration.GetSection("OliveRole"));
 
-builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
 

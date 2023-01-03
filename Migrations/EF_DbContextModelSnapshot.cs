@@ -88,9 +88,9 @@ namespace CreateProjectOlive.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ef73b78e-b8fe-4768-a73a-7c0095101013",
+                            Id = "b8b5a61a-450d-4678-9613-d1f4c0747bf1",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "69acd89d-a08c-4d63-bb22-360ff8818605",
+                            ConcurrencyStamp = "1079d035-9280-4dbb-b4d7-22052ede8998",
                             Email = "admin@optimumpartners.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
@@ -132,22 +132,22 @@ namespace CreateProjectOlive.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "21940644-3623-40bd-bc49-b79765e88b5c",
+                            Id = "52ca6105-f842-4906-bb17-52241fbfecd6",
                             ConcurrencyStamp = "5c90b312-aa30-4ca5-b36c-c75f3a348d3e",
                             Name = "SuperAdmin",
                             NormalizedName = "SUPERADMIN"
                         },
                         new
                         {
-                            Id = "15c09da4-81a8-4084-bfbb-92ed43ce8ae8",
-                            ConcurrencyStamp = "884f964e-2584-43fc-8e72-70ce36f41b98",
+                            Id = "78243ff5-4b0b-4636-bfe5-d905a7865bb9",
+                            ConcurrencyStamp = "98401571-3e0d-4e1d-a886-80ae472db21b",
                             Name = "BusinessOwner",
                             NormalizedName = "BUSINESSOWNER"
                         },
                         new
                         {
-                            Id = "5da91ee0-8707-4a24-be48-e5774956e1ab",
-                            ConcurrencyStamp = "39d22ebe-fa87-4666-88b5-a7f2e9b888d1",
+                            Id = "66dd5062-4ebe-4edb-93a1-23df526539a7",
+                            ConcurrencyStamp = "1a620455-7701-4983-a96b-c6385b00bbf4",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -242,8 +242,8 @@ namespace CreateProjectOlive.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "ef73b78e-b8fe-4768-a73a-7c0095101013",
-                            RoleId = "21940644-3623-40bd-bc49-b79765e88b5c"
+                            UserId = "b8b5a61a-450d-4678-9613-d1f4c0747bf1",
+                            RoleId = "52ca6105-f842-4906-bb17-52241fbfecd6"
                         });
                 });
 

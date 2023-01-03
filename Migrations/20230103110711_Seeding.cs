@@ -160,20 +160,20 @@ namespace CreateProjectOlive.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "15c09da4-81a8-4084-bfbb-92ed43ce8ae8", "884f964e-2584-43fc-8e72-70ce36f41b98", "BusinessOwner", "BUSINESSOWNER" },
-                    { "21940644-3623-40bd-bc49-b79765e88b5c", "5c90b312-aa30-4ca5-b36c-c75f3a348d3e", "SuperAdmin", "SUPERADMIN" },
-                    { "5da91ee0-8707-4a24-be48-e5774956e1ab", "39d22ebe-fa87-4666-88b5-a7f2e9b888d1", "Admin", "ADMIN" }
+                    { "52ca6105-f842-4906-bb17-52241fbfecd6", "5c90b312-aa30-4ca5-b36c-c75f3a348d3e", "SuperAdmin", "SUPERADMIN" },
+                    { "66dd5062-4ebe-4edb-93a1-23df526539a7", "1a620455-7701-4983-a96b-c6385b00bbf4", "Admin", "ADMIN" },
+                    { "78243ff5-4b0b-4636-bfe5-d905a7865bb9", "98401571-3e0d-4e1d-a886-80ae472db21b", "BusinessOwner", "BUSINESSOWNER" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "ef73b78e-b8fe-4768-a73a-7c0095101013", 0, "69acd89d-a08c-4d63-bb22-360ff8818605", "admin@optimumpartners.com", false, false, null, "ADMIN@OPTIMUMPARTNERS.COM", "ADMIN", "AQAAAAEAACcQAAAAEI99MKFTBxu+rmOvvm8PZbXbVHCLtDa57L+/ZS/68kKU6e0OcP5Sg+U6+TYJ3s1yFg==", null, false, "P4HECIURGID4GGDNIUF24PQTFTTYDCER", false, "Admin" });
+                values: new object[] { "b8b5a61a-450d-4678-9613-d1f4c0747bf1", 0, "1079d035-9280-4dbb-b4d7-22052ede8998", "admin@optimumpartners.com", false, false, null, "ADMIN@OPTIMUMPARTNERS.COM", "ADMIN", "AQAAAAEAACcQAAAAEI99MKFTBxu+rmOvvm8PZbXbVHCLtDa57L+/ZS/68kKU6e0OcP5Sg+U6+TYJ3s1yFg==", null, false, "P4HECIURGID4GGDNIUF24PQTFTTYDCER", false, "Admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "21940644-3623-40bd-bc49-b79765e88b5c", "ef73b78e-b8fe-4768-a73a-7c0095101013" });
+                values: new object[] { "52ca6105-f842-4906-bb17-52241fbfecd6", "b8b5a61a-450d-4678-9613-d1f4c0747bf1" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
