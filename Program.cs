@@ -1,42 +1,92 @@
-using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
+
 using CreateProjectOlive.Models;
-using CreateProjectOlive.Services;
-using CreateProjectOlive.UnitOfWork;
+using CreateProjectOlive.UnitOfWorks;
+// using CreateProjectOlive.SeedMiddleware;
+using CreateProjectOlive.Context;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+// Add services to the container.
+
+builder.Services.AddDbContext<EF_DbContext>(
+        o => o.UseNpgsql(builder.Configuration.GetConnectionString("Ef_Postgres_Db"))
+    );
+
+
+builder.Services.AddIdentity<User, IdentityRole>(option =>
 {
-    public static void Main(string[] args)
+
+    option.Password = new PasswordOptions
     {
-        var builder = WebApplication.CreateBuilder(args);
+        RequiredLength = 8,
+        RequireDigit = true,
+        RequireLowercase = true,
+        RequireUppercase = true,
+        RequireNonAlphanumeric = false
+    };
 
-        // Add services to the container.
-
-        builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.AddSingleton(typeof(IUnitOfWork), typeof(UnitOfWork));
-        builder.Services.AddSingleton(typeof(IProjectService), typeof(ProjectService));
-        builder.Services.AddAutoMapper(typeof(Program));
-
-        builder.Services.Configure<ProjectDataBaseConfig>(builder.Configuration.GetSection("MongoDb"));
-        var app = builder.Build();
-
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-
-        app.UseHttpsRedirection();
-
-        app.UseAuthorization();
+    option.User = new UserOptions
+    {
+        RequireUniqueEmail = true,
+    };
 
 
-        app.MapControllers();
+}).AddEntityFrameworkStores<EF_DbContext>();
 
-        app.Run();
-    }
+
+builder.Services.Configure<SeedIdentityUserOptions>(builder.Configuration.GetSection("Admin"));
+builder.Services.Configure<SeedRoleOptions>(builder.Configuration.GetSection("OliveRole"));
+
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+
+    };
+});
+
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+
+// //Authentication & Authorization
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// await app.UseSeedMiddleware();
+
+app.MapControllers();
+
+app.Run();
+public partial class Program { }
