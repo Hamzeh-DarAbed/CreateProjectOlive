@@ -1,6 +1,4 @@
 using CreateProjectOlive.Models;
-using CreateProjectOlive.UnitOfWorks;
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -80,11 +78,11 @@ namespace CreateProjectOlive.Controllers
                 User appUser = await _userManager.FindByEmailAsync(LoginData.Email);
                 if (appUser != null)
                 {
-                    Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, LoginData.Password, false, false);
-                    if (result.Succeeded)
+                    var role = await _userManager.GetRolesAsync(appUser);
+                    if (role.Contains("SuperAdmin"))
                     {
-                        var role = await _userManager.GetRolesAsync(appUser);
-                        if (role.Contains("SuperAdmin"))
+                        Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(appUser, LoginData.Password, false, false);
+                        if (result.Succeeded)
                         {
                             var token = GenerateToken(appUser);
                             return Ok(token);
